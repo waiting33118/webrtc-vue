@@ -1,4 +1,4 @@
-# client
+# Webrtc-Vue
 
 ## Project setup
 ```
