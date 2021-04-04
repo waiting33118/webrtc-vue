@@ -5,10 +5,12 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "docker": "docker build -f Dockerfile.prod -t asia.gcr.io/drone-cloud-295410/webrtc-client . && docker push asia.gcr.io/drone-cloud-295410/webrtc-client"
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "socket.io-client": "^4.0.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
