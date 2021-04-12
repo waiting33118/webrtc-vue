@@ -1,11 +1,16 @@
 <template>
   <h1>Client</h1>
-  <video
-    id="video"
-    ref="videoEl"
-    autoplay
-    muted
-  />
+  <div class="video-wrapper">
+    <video
+      id="remote"
+      autoplay
+    />
+    <video
+      id="local"
+      autoplay
+      muted
+    />
+  </div>
 </template>
 
 <script>
@@ -13,17 +18,36 @@ import { io } from 'socket.io-client'
 export default {
   name: 'Home',
   setup () {
-    const DOMAIN = process.env.NODE_ENV === 'development' ? 'https://signal-server-6zwa3npg7q-de.a.run.app' : 'https://signal-server-6zwa3npg7q-de.a.run.app'
+    const DOMAIN = 'https://signal-server-6zwa3npg7q-de.a.run.app'
     const socket = io(DOMAIN)
     let pc
 
     socket.on('connect', async () => {
+      const { stream, track } = await setLocalStream()
       pc = createPeerConnection()
+      track.forEach(track => pc.addTrack(track, stream))
       pc.onicecandidate = handleIceCandidate
       pc.addEventListener('track', event => {
-        const videoEl = document.getElementById('video')
+        const videoEl = document.querySelector('#remote')
         videoEl.srcObject = event.streams[0]
       })
+
+      async function setLocalStream () {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: ['environment', 'user'],
+            width: 640,
+            height: 720
+          },
+          audio: true
+        })
+        document.querySelector('#local').srcObject = stream
+
+        return {
+          stream,
+          track: stream.getTracks()
+        }
+      }
 
       function createPeerConnection () {
         return new RTCPeerConnection({
@@ -48,7 +72,6 @@ export default {
     })
 
     socket.on('candidate', candidate => {
-      console.log(candidate)
       pc.addIceCandidate(candidate)
     })
   }
@@ -56,10 +79,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-video {
-  display:block;
-  width: calc(100% - 20px);
-  max-width: 700px;
-  margin: 5px auto;
+.video-wrapper{
+  width:100%;
+  display:flex;
+  justify-content: center;
 }
 </style>
